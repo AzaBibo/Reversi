@@ -15,6 +15,7 @@ int main(int argc, char ** argv) {
 	if(argc != 4) error("Invalid number of arguments");
     	printBoard();
 	conn_client_fd = connect_ipaddr_port(argv[2], atoi(argv[3]));
+	chat_client(conn_client_fd);
 	}
     else if(strcmp(argv[1], "-server") == 0) { // 'O' #STARTS
    	//TODO
