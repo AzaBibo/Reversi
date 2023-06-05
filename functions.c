@@ -52,7 +52,7 @@ void printBoard() {
 void screen_start() {
 	initscr();
 	cbreak();
-	noecho();
+	//noecho();
 	curs_set(0);
 	start_color();
 
@@ -120,6 +120,7 @@ int listen_at_port (int portnum)
 void chat_server (int conn_fd) 
 {
 	char buf[256] ;
+	printBoard();
 
 	do {
 		int s ;
@@ -180,6 +181,7 @@ int connect_ipaddr_port (const char * ip, int port)
 void chat_client (int conn_fd)
 {
 	char buf[256] ;
+	printfBoard();
 
 	do {
 		mvprintw(0, 0, "You are 'X'. Now X's turn, X's move (yx): "); //TODO 
