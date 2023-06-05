@@ -52,10 +52,10 @@ void printBoard() {
 void screen_start() {
 	initscr();
 	cbreak();
-	//noecho();
+	noecho();
 	curs_set(0);
-	start_color();
 
+	start_color();
 	init_color(COLOR_PAIR(3), 500, 500, 500); //GREy
 	init_pair(1, COLOR_RED, COLOR_BLACK); // 'X' for now
 	init_pair(2, COLOR_YELLOW, COLOR_BLACK); // 'O' for now
@@ -122,7 +122,6 @@ int listen_at_port (int portnum)
 void chat_server (int conn_fd) 
 {
 	char buf[256] ;
-	screen_start();
 
 	do {
 		int s ;
@@ -183,7 +182,6 @@ int connect_ipaddr_port (const char * ip, int port)
 void chat_client (int conn_fd)
 {
 	char buf[256] ;
-	screen_start();
 
 	do {
 		mvprintw(0, 0, "You are 'X'. Now X's turn, X's move (yx): "); //TODO 
