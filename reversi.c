@@ -13,12 +13,14 @@ int main(int argc, char ** argv) {
         //TODO
         if(argc != 4) error("Invalid number of arguments");
         conn_client_fd = connect_ipaddr_port(argv[2], atoi(argv[3]));
+        screen_start();
         chat_client(conn_client_fd);
 	}
     else if(strcmp(argv[1], "-server") == 0) { // 'O' #STARTS
         //TODO
         if(argc != 3) error("Invalid number of arguments");
         conn_server_fd = listen_at_port(atoi(argv[2]));
+        screen_start();
         chat_server(conn_server_fd);
     }  
     else {
