@@ -7,7 +7,6 @@ functions.o: functions.c functions.h
 
 reversi: functions.o reversi.c
 	gcc reversi.c functions.o -g -o reversi -lncurses
-	./reversi
 
 clean:
 	rm reversi *.o
