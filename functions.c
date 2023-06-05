@@ -60,6 +60,8 @@ void screen_start() {
 	init_pair(1, COLOR_RED, COLOR_BLACK); // 'X' for now
 	init_pair(2, COLOR_YELLOW, COLOR_BLACK); // 'O' for now
 	init_pair(4, COLOR_BLUE, COLOR_BLACK); // '*' for now
+
+	printBoard();
 }
 
 void screen_end(int server, int client) {
@@ -121,7 +123,6 @@ void chat_server (int conn_fd)
 {
 	char buf[256] ;
 	screen_start();
-	printBoard();
 
 	do {
 		int s ;
@@ -183,7 +184,6 @@ void chat_client (int conn_fd)
 {
 	char buf[256] ;
 	screen_start();
-	printBoard();
 
 	do {
 		mvprintw(0, 0, "You are 'X'. Now X's turn, X's move (yx): "); //TODO 
