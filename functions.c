@@ -129,7 +129,10 @@ void chat_server (int conn_fd)
 			break ;
 
 		buf[s] = '\0' ;
-		printf(">%s\n", buf) ; //TODO edit printf()
+		
+		mvprintw(0, 0, "You are 'O'. Now 'X' turn, X's move (yx): "); //TODO
+		printw("%s\n", buf); // TODO
+		//printf(">%s\n", buf) ; //TODO edit printf()
         //redirect to logic function and printBoard functions
 
 		
@@ -138,7 +141,8 @@ void chat_server (int conn_fd)
 		if (strcmp(buf, "quit()") == 0)
 			break ;
 
-		send(conn_fd, buf, strlen(buf), 0) ;
+		send(conn_fd, buf, strlen(buf), 0) ; 
+		mvprintw(0, 0, "You are 'O'. Now 'O' turn, O's move (yx): %s\n", buf); //TODO
 
 	} while (strcmp(buf, "quit()") != 0) ;
 }
@@ -178,12 +182,14 @@ void chat_client (int conn_fd)
 	char buf[256] ;
 
 	do {
+		mvprintw(0, 0, "You are 'X'. Now X's turn, X's move (yx): "); //TODO 
 		fgets(buf, 256, stdin) ;
 		buf[strlen(buf) - 1] = '\0' ;
 		if (strcmp(buf, "quit()") == 0)
 			break ;
 
 		send(conn_fd, buf, strlen(buf), 0) ;
+		printw("%s\n", buf); //TODO
 
 		int s ;
 		while ((s = recv(conn_fd, buf, 1024, 0)) == 0) ;
@@ -191,7 +197,8 @@ void chat_client (int conn_fd)
 			break ;
 		buf[s] = '\0' ;
 
-		printf(">%s\n", buf) ; //TODO edit printf()
+		//printf(">%s\n", buf) ; //TODO edit printf()
+		mvprintw(0, 0, "You are 'X'. Now X's turn, X's move (yx): %s", buf); //TODO
         //redirect to logic part, and call printBoard();
 	} while (strcmp(buf, "quit()") != 0) ;
 }
