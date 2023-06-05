@@ -18,15 +18,17 @@ int main(int args, char ** argv) {
     initscr();
     screen_start();
 
-    printBoard(the_board);
-
     if(args < 2) 
 	    error("Invalid number of arguments");
-    if (strcmp(argv[], "client") == 0) {
+    if (strcmp(argv[1], "-client") == 0) { // 'X'
 	//TODO
+	if(argc != 3) error("Invalid number of arguments");
+    	printBoard(the_board);
 	}
-    else if(strcmp(argv[], "server") == 0) {
+    else if(strcmp(argv[1], "-server") == 0) { // 'O' #STARTS
    	//TODO
+	if(args != 4) error("Invalid number of arguments");
+    	printBoard(the_board);
     }  
     else {
 	error("Passing the wrong arguments");

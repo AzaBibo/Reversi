@@ -1,6 +1,6 @@
 #include "functions.c"
 
-void pritnBoard();
+void printBoard();
 
 void help();
 
