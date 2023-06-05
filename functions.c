@@ -1,6 +1,8 @@
-#include <stdio.h>
+#include <ncurses.h>
 #include <stdlib.h>
 #include <string.h>
+
+
 #include <sys/socket.h> 
 #include <netinet/in.h> 
 #include <netinet/tcp.h>
@@ -45,6 +47,23 @@ void printBoard() {
             }
         }
     }
+}
+
+void screen_start() {
+	initscr();
+	cbreak();
+	noecho();
+	curs_set(0);
+	start_color();
+
+	init_color(COLOR_PAIR(3), 500, 500, 500); //GREy
+	init_pair(1, COLOR_RED, COLOR_BLACK); // 'X' for now
+	init_pair(2, COLOR_YELLOW, COLOR_BLACK); // 'O' for now
+	init_pair(4, COLOR_BLUE, COLOR_BLACK); // '*' for now
+}
+
+void screen_end() {
+    endwin();
 }
 
 void help() {
