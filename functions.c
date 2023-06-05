@@ -120,6 +120,7 @@ int listen_at_port (int portnum)
 void chat_server (int conn_fd) 
 {
 	char buf[256] ;
+	screen_start();
 	printBoard();
 
 	do {
@@ -181,6 +182,7 @@ int connect_ipaddr_port (const char * ip, int port)
 void chat_client (int conn_fd)
 {
 	char buf[256] ;
+	screen_start();
 	printBoard();
 
 	do {
