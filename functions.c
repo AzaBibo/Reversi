@@ -129,7 +129,8 @@ void chat_server (int conn_fd)
 			break ;
 
 		buf[s] = '\0' ;
-		printf(">%s\n", buf) ;
+		printf(">%s\n", buf) ; //TODO edit printf()
+        //redirect to logic function and printBoard functions
 
 		
 		fgets(buf, 256, stdin) ;
@@ -190,6 +191,7 @@ void chat_client (int conn_fd)
 			break ;
 		buf[s] = '\0' ;
 
-		printf(">%s\n", buf) ;
+		printf(">%s\n", buf) ; //TODO edit printf()
+        //redirect to logic part, and call printBoard();
 	} while (strcmp(buf, "quit()") != 0) ;
 }
