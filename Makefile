@@ -1,8 +1,8 @@
 .PHONY : all clean
 
 reversi:
-	gcc reversi.c -g -lncurses -o reversi
-
+	gcc reversi.c -g -o reversi -lncurses
+	./reversi
 clean:
-	rm -rf .o
+	rm reversi
 	clear
