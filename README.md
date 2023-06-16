@@ -4,7 +4,7 @@
 * using socket for network communication
 
 ### Reversi
-• A turn-based board game with an 8x8 square board, and black and white 
+* A turn-based board game with an 8x8 square board, and black and white 
 stones
 
 ## Dependency
