@@ -199,7 +199,7 @@ void chat_server (int conn_fd)
 
 	while(1)
 	{
-		mvprintw(0, 0, "Partenr turn                                                                          ");
+		mvprintw(0, 0, "Partner turn                                                                          ");
 		refresh();
 	
 		if (recv(conn_fd, point, 8, 0) == 0)
@@ -300,7 +300,7 @@ void chat_client (int conn_fd)
 			continue;
 		printBoard(clinet_board);
 		refresh();
-		mvprintw(0, 0, "Partenr turn                                                                          ");
+		mvprintw(0, 0, "Partner turn                                                                          ");
 		refresh();
 	
 		send(conn_fd, point, 8, 0);
