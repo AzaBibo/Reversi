@@ -1,6 +1,15 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
+#include <ncurses.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h> 
+#include <netinet/in.h> 
+#include <netinet/tcp.h>
+#include <arpa/inet.h>
+#include <linux/socket.h>
+
 void printBoard();
 
 void screen_start();

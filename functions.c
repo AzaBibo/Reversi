@@ -1,13 +1,3 @@
-#include <ncurses.h>
-#include <stdlib.h>
-#include <string.h>
-
-
-#include <sys/socket.h> 
-#include <netinet/in.h> 
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <linux/socket.h>
 #include "functions.h"
 
 char the_board[8][8] = {
