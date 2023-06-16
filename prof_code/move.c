@@ -15,25 +15,12 @@ void rectangle(int y1, int x1, int y2, int x2)
 	mvaddch(y2, x2, ACS_LRCORNER);
 }
 
-
-int main ()
+void dodd()
 {
-	initscr() ;
-	clear() ;
-
-	noecho() ;
-	cbreak() ;
-	keypad(stdscr, TRUE) ;
-
-	curs_set(2) ;
-
-	rectangle(5,5, 15, 15) ;
-
 	int y = 10, x = 10 ;
 	move(10, 10) ;
 
 	refresh() ;
-
 	int c ;
 	while (c = getch()) {
 		switch (c) {
@@ -63,6 +50,29 @@ int main ()
 		move(y, x) ;
 		refresh() ;
 	}
+}
+void init()
+{
+	initscr() ;
+	clear() ;
+
+	noecho() ;
+	keypad(stdscr, TRUE) ;
+
+	curs_set(2) ;
+
+	rectangle(5,5, 15, 15) ;
+
+	dodd();
+}
+
+int main ()
+{
+	
+
+	init();
+
+	
 
 	endwin() ;
 }
