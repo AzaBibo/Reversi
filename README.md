@@ -17,12 +17,7 @@ stones
 2. ```$ cd ./bin/```
 3. ```$ ./server <port>```
 
-### Client 1 Side
-1. ```$ make```
-2. ```$ cd ./bin/```
-3. ```$ ./client <ip address> <port>```
-
-### Client 2 Side
+### Client Side
 1. ```$ make```
 2. ```$ cd ./bin/```
 3. ```$ ./client <ip address> <port>```
