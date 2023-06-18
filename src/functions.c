@@ -14,10 +14,12 @@ char (*initBoard())[8] {
     return the_board;
 }
 
-
 void printBoard(char (*the_board)[8]) {
-    int start_row = (LINES - 8) / 2;  // Calculate the starting row to center the board
-    int start_col = (COLS - 8) / 2;   // Calculate the starting column to center the board
+    // int start_row = (LINES - 8) / 2;  // Calculate the starting row to center the board
+    // int start_col = (COLS - 8) / 2;   // Calculate the starting column to center the board
+
+	int start_row = 5;  // Calculate the starting row to center the board
+    int start_col = 5;   // Calculate the starting column to center the board
 
     int spacing = 2;  // Adjust the spacing between characters
 
@@ -45,7 +47,6 @@ void printBoard(char (*the_board)[8]) {
 }
 
 
-
 void screen_start(char (*the_board)[8]) {
 	initscr();
 	noecho();
@@ -67,8 +68,7 @@ void screen_end(int server, int client) {
     shutdown(client, SHUT_RDWR);
 }
 
-void pickBoard(int *point)
-{
+void pickBoard(int *point) {
 	int x = point[0];
 	int y = point[1];
 
@@ -109,33 +109,29 @@ void pickBoard(int *point)
 		move(y, x) ;
 		refresh() ;
 	}
-	point[0] = -1;	// if q is pressed.
+	endwin();
+	exit(1);
 }
 
-int checkWhetherValid(char (*the_board)[8], int *point, char xo)
-{
+int checkWhetherValid(char (*the_board)[8], int *point, char xo) {
 	int x = point[0];
 	int y = point[1];
 
-	if (x == -1)
+	// check if a move is vaild
+	if (x % 2 == 0 || y % 2 == 0)
+		return -1;
+
+	x = (x - 5) / 2;
+	y = (y - 5) / 2;
+
+	// check if a move is vaild
+	if (x < 0 || x > 7 || y < 0 || y > 7)
+		return -1;
+	else if (the_board[y][x] != '*')
 		return -2;
 
-	if (x % 2 == 1 || y % 2 == 1) {
-		return -1;
-	}
+	the_board[y][x] = xo;
 
-	x = (x - 30) / 2;
-	y = (y - 8) / 2;
-
-	if (x < 0 || x > 7 || y < 0 || y > 7) {
-		return -1;
-	}
-
-	if (the_board[y][x] == '*')
-		the_board[y][x] = xo;
-	
-	else
-		return -3;
 	point[0] = x;
 	point[1] = y;
 	return 0;
@@ -194,55 +190,55 @@ void chat_server (int conn_fd)
 {
 	char (*server_board)[8] = initBoard();
 	screen_start(server_board);
-	int point[2] = {10, 10};
+	int point[2] = {5, 5};
 	int check= 0; 	// check whether valid move
+
+	mvprintw(0, 0, "Partner turn                                                                          ");
+	refresh();
+
+	if (recv(conn_fd, point, 8, 0) == 0)
+		check = -10;
+
+	server_board[point[1]][point[0]] = 'X';
+	printBoard(server_board);
+	point[0] = point[0] * 2 + 5;
+	point[1] = point[1] * 2 + 5;
 
 	while(1)
 	{
-		mvprintw(0, 0, "Partner turn                                                                          ");
-		refresh();
-	
-		if (recv(conn_fd, point, 8, 0) == 0)
-			break;
-
-		server_board[point[1]][point[0]] = 'X';
-		printBoard(server_board);
-		point[0] = point[0] * 2 + 30;
-		point[1] = point[1] * 2 + 8;
-	
-		mvprintw(0, 0, "You are 'O'. Now X's turn, X's move (yx): ");
-		refresh();
-
-		while(1)
-		{
-			pickBoard(point);
-			keypad(stdscr, FALSE);
-			check = checkWhetherValid(server_board, point, 'O');
-			if (check == 0)
-				break;
-			else if(check == -1)
-				mvprintw(0, 0, "Invalid move, try again.(If you enter the 'q', you can quit the game)");
-			else if (check == -2)
-				break;
-			else if (check == -3)
+		if (check == 0)
+			mvprintw(0, 0, "You are 'O'. Now X's turn, X's move (yx): ");
+		else if(check == -1)
+			mvprintw(0, 0, "Invalid move, try again.");
+		else if (check == -2)
 				mvprintw(0, 0, "This place is already marked!                                          ");
-		}
-		if (check == -2)
-			break;
 
+		refresh();
+
+		pickBoard(point);
+		keypad(stdscr, FALSE);
+		check = checkWhetherValid(server_board, point, 'O');
+		if (check < 0)
+			continue;
 		printBoard(server_board);
 		refresh();
 		send(conn_fd, point, 8, 0);
+
+		mvprintw(0, 0, "Partner turn                                                                          ");
+		refresh();
+	
+
+		if (recv(conn_fd, point, 8, 0) == 0)
+			break;
+		
+		server_board[point[1]][point[0]] = 'X';
+		printBoard(server_board);
+		point[0] = point[0] * 2 + 5;
+		point[1] = point[1] * 2 + 5;
+		check = 0;
 	}
 	endwin();
-	// int i, j;
-	// for(i=0; i<8; i++)
-	// {
-	// 	for(j=0; j<8; j++)
-	// 		printf("%c", server_board[i][j]);
-	// 	printf("\n");
-	// }
-	// printf("%d-%d", point[0], point[1]);
+
 }
 
 int connect_ipaddr_port (const char * ip, int port)
@@ -279,18 +275,17 @@ void chat_client (int conn_fd)
 {
 	char (*clinet_board)[8] = initBoard();
 	screen_start(clinet_board);
-	int point[2] = {10, 10};
+	int point[2] = {5, 5};
 	int check= 0; 	// check whether valid move
 	while(1)
 	{
 		if (check == 0)
 			mvprintw(0, 0, "You are 'X'. Now X's turn, X's move (yx): ");
 		else if(check == -1)
-			mvprintw(0, 0, "Invalid move, try again.(If you enter the 'q', you can quit the game)");
+			mvprintw(0, 0, "Invalid move, try again.");
 		else if (check == -2)
-			break;
-		else if (check == -3)
 				mvprintw(0, 0, "This place is already marked!                                          ");
+		mvprintw(10, 0, "%d - %d", point[0], point[1]);
 		refresh();
 
 		pickBoard(point);
@@ -310,19 +305,10 @@ void chat_client (int conn_fd)
 		
 		clinet_board[point[1]][point[0]] = 'O';
 		printBoard(clinet_board);
-		point[0] = point[0] * 2 + 30;
-		point[1] = point[1] * 2 + 8;
+		point[0] = point[0] * 2 + 5;
+		point[1] = point[1] * 2 + 5;
 		check = 0;
 	}
 
 	endwin();
-	// int i, j;
-	// for(i=0; i<8; i++)
-	// {
-	// 	for(j=0; j<8; j++)
-	// 		printf("%c", clinet_board[i][j]);
-	// 	printf("\n");
-	// }
-	// printf("%d-%d", point[0], point[1]);
-
 }
