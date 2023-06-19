@@ -15,9 +15,6 @@ char (*initBoard())[8] {
 }
 
 void printBoard(char (*the_board)[8]) {
-    // int start_row = (LINES - 8) / 2;  // Calculate the starting row to center the board
-    // int start_col = (COLS - 8) / 2;   // Calculate the starting column to center the board
-
 	int start_row = 5;  // Calculate the starting row to center the board
     int start_col = 5;   // Calculate the starting column to center the board
 
@@ -109,8 +106,8 @@ void pickBoard(int *point) {
 		move(y, x) ;
 		refresh() ;
 	}
-	endwin();
-	exit(1);
+	error("User quit the game");
+
 }
 
 int checkWhetherValid(char (*the_board)[8], int *point, char xo) {
@@ -130,11 +127,313 @@ int checkWhetherValid(char (*the_board)[8], int *point, char xo) {
 	else if (the_board[y][x] != '*')
 		return -2;
 
-	the_board[y][x] = xo;
+	int dir[8][2] = {
+		{0, -1}, // up
+		{0, 1}, // down
+		{-1, 0}, // left
+		{1, 0}, // right
+		{-1, -1}, // up-left
+		{-1, 1}, // up-right
+		{1, -1}, // down-left
+		{1, 1} // down-right
+	};
 
+	int flag = 0;
+	for (int i = 0; i < 8; i++) {
+		int x_dir = dir[i][0];
+		int y_dir = dir[i][1];
+
+		int x_temp = x + x_dir;
+		int y_temp = y + y_dir;
+
+		if (x_temp < 0 || x_temp > 7 || y_temp < 0 || y_temp > 7)
+			continue;
+
+		if (the_board[y_temp][x_temp] == xo)
+			continue;
+
+		while (the_board[y_temp][x_temp] != '*') {
+			x_temp += x_dir;
+			y_temp += y_dir;
+
+			if (x_temp < 0 || x_temp > 7 || y_temp < 0 || y_temp > 7)
+				break;
+
+			if (the_board[y_temp][x_temp] == xo) {
+				flag = 1;
+				break;
+			}
+		}
+
+		if (flag == 1)
+			break;
+	}
+
+	if (flag == 0)
+		return -1;
+	
 	point[0] = x;
 	point[1] = y;
+	
 	return 0;
+}
+
+void changeBoard(char (*the_board)[8], int *point, char xo) {
+	int x = point[0];
+	int y = point[1];
+
+	the_board[y][x] = xo;
+
+	int dir[8][2] = {
+		{0, -1}, // up
+		{0, 1}, // down
+		{-1, 0}, // left
+		{1, 0}, // right
+		{-1, -1}, // up-left
+		{-1, 1}, // up-right
+		{1, -1}, // down-left
+		{1, 1} // down-right
+	};
+
+	for (int i = 0; i < 8; i++) {
+		int x_dir = dir[i][0];
+		int y_dir = dir[i][1];
+
+		int x_temp = x + x_dir;
+		int y_temp = y + y_dir;
+
+		if (x_temp < 0 || x_temp > 7 || y_temp < 0 || y_temp > 7)
+			continue;
+
+		if (the_board[y_temp][x_temp] == xo)
+			continue;
+
+		while (the_board[y_temp][x_temp] != '*') {
+			x_temp += x_dir;
+			y_temp += y_dir;
+
+			if (x_temp < 0 || x_temp > 7 || y_temp < 0 || y_temp > 7)
+				break;
+
+			if (the_board[y_temp][x_temp] == xo) {
+				while (the_board[y_temp - y_dir][x_temp - x_dir] != xo) {
+					the_board[y_temp - y_dir][x_temp - x_dir] = xo;
+					x_temp -= x_dir;
+					y_temp -= y_dir;
+				}
+				break;
+			}
+		}
+	}
+}
+
+int pass(char (*the_board)[8], char xo)
+{
+	int flag = 0;
+	int temp_point[2];
+	for (int i = 0; i < 8 && flag == 0; i++) {
+		for (int j = 0; j < 8 && flag == 0; j++) {
+			if (the_board[i][j] == '*') {
+				temp_point[0] = j * 2 + 5;
+				temp_point[1] = i * 2 + 5;
+				if (checkWhetherValid(the_board, temp_point, xo) == 0)
+					flag = 1;
+			}
+		}
+	}
+	return flag;
+}
+
+int endgame(char (*the_board)[8])
+{
+	int flag = 1;
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			if (the_board[i][j] == '*') {
+				flag = 0;
+				break;
+			}
+		}
+	}
+	return flag;
+}
+
+int countBoard(char (*the_board)[8], char xo)
+{
+	int count = 0;
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8 ; j++) {
+			if (the_board[i][j] == xo)
+				count++;
+		}
+	}
+
+	return count;
+}
+
+int listen_at_port (int portnum) 
+{
+	int sock_fd = socket(AF_INET /*IPv4*/, SOCK_STREAM /*TCP*/, 0 /*IP*/) ;
+	if (sock_fd == 0)
+		error("socket failed");
+	int opt = 2 ;
+	if (setsockopt(sock_fd, SOL_TCP, TCP_NODELAY, &opt, sizeof(opt)) != 0)
+		error("setsockopt failed");
+
+	struct sockaddr_in address ; 
+	bzero(&address, sizeof(address)); 	
+	address.sin_family = AF_INET; 
+	address.sin_addr.s_addr = INADDR_ANY /* localhost */ ; 
+	address.sin_port = htons(portnum); 
+
+	if (bind(sock_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
+		error("bind failed");
+
+	if (listen(sock_fd, 16 /* the size of waiting queue*/) < 0)
+		error("listen failed");
+
+	int addrlen = sizeof(address); 
+	int conn_fd = accept(sock_fd, (struct sockaddr *) &address, (socklen_t*)&addrlen) ;
+	if (conn_fd < 0)	
+		error("accept failed") ;
+	return conn_fd ;
+}
+
+int connect_ipaddr_port (const char * ip, int port)
+{
+	int sock_fd ;
+	sock_fd = socket(AF_INET, SOCK_STREAM, 0) ;
+	if (sock_fd <= 0)
+		error("socket failed");
+	int opt = 2 ;
+	if (setsockopt(sock_fd, SOL_TCP, TCP_NODELAY, &opt, sizeof(opt)) != 0)
+		error("setsockopt failed");
+
+	struct sockaddr_in address;
+	bzero(&address, sizeof(address));
+	address.sin_family = AF_INET; 
+	address.sin_port = htons(port); 
+	if (inet_pton(AF_INET, ip, &address.sin_addr) <= 0)
+		error("inet_pton failed");
+
+	if (connect(sock_fd, (struct sockaddr *) &address, sizeof(address)) < 0)
+		error("connect failed");
+	return sock_fd;
+}
+
+void chat_server (int conn_fd) 
+{
+	char (*server_board)[8] = initBoard();
+	screen_start(server_board);
+	int point[2] = {5, 5};
+
+	mvprintw(0, 0, "Partner turn                                                                          ");
+	refresh();
+
+	if (recv(conn_fd, point, 8, 0) == 0)
+		error("recv failed");
+
+	changeBoard(server_board, point, 'X');
+	printBoard(server_board);
+
+	point[0] = point[0] * 2 + 5;
+	point[1] = point[1] * 2 + 5;
+
+	while(1)
+	{
+		networking(conn_fd, server_board, 'O', point);
+	}
+	endwin();
+
+}
+
+
+void chat_client (int conn_fd)
+{
+	char (*clinet_board)[8] = initBoard();
+	screen_start(clinet_board);
+	int point[2] = {5, 5};
+
+	while(1)
+	{
+		networking(conn_fd, clinet_board, 'X', point);
+	}
+
+	endwin();
+}
+
+void networking(int conn_fd, char (*the_board)[8], char xo, int *point)
+{
+	int check = 0;
+	char opponent = (xo == 'X') ? 'O' : 'X';
+	if (pass(the_board, xo) == 0)
+		check = 1;
+	do {
+		if (check == 1) 	// pass
+			break;
+		else if (check == 0)
+			mvprintw(0, 0, "You are '%c'. Now X's turn, X's move (yx): ", xo);
+		else if(check == -1)
+			mvprintw(0, 0, "Invalid move, try again.");
+		else if (check == -2)
+			mvprintw(0, 0, "This place is already marked!                                          ");
+		refresh();
+
+		pickBoard(point);
+		keypad(stdscr, FALSE);
+		check = checkWhetherValid(the_board, point, xo);
+	}while(check != 0);
+
+	changeBoard(the_board, point, xo);
+
+	printBoard(the_board);
+	send(conn_fd, point, 8, 0);
+	refresh();
+
+	if (endgame(the_board) == 1) {
+		if (countBoard(the_board, xo) > countBoard(the_board, opponent))
+			mvprintw(0, 0, "You win!                                                                             ");
+		else if (countBoard(the_board, xo) < countBoard(the_board, opponent))
+			mvprintw(0, 0, "You lose!                                                                            ");
+		else if (countBoard(the_board, xo) == countBoard(the_board, opponent))
+			mvprintw(0, 0, "Draw!                                                                                ");
+		refresh();
+		while(1)
+		{
+			if (getch() == 'q')
+				break;
+		}
+		endwin();
+		exit(EXIT_SUCCESS);
+	}
+
+	mvprintw(0, 0, "Partner turn                                                                          ");
+	refresh();
+
+
+	if (recv(conn_fd, point, 8, 0) == 0)
+		error("recv failed");
+	
+	changeBoard(the_board, point, opponent);
+	printBoard(the_board);
+	if (endgame(the_board) == 1) {
+		if (countBoard(the_board, xo) > countBoard(the_board, opponent))
+			mvprintw(0, 0, "You win!                                                                             ");
+		else if (countBoard(the_board, xo) < countBoard(the_board, opponent))
+			mvprintw(0, 0, "You lose!                                                                            ");
+		else if (countBoard(the_board, xo) == countBoard(the_board, opponent))
+			mvprintw(0, 0, "Draw!                                                                                ");
+		refresh();
+		while(1)
+		{
+			if (getch() == 'q')
+				break;
+		}
+		endwin();
+		exit(EXIT_SUCCESS);
+	}
+	point[0] = point[0] * 2 + 5;
+	point[1] = point[1] * 2 + 5;
 }
 
 void help() {
@@ -144,171 +443,7 @@ void help() {
 }
 
 void error(char *message) {
+	endwin();
     printf("%s\n", message);
     exit(EXIT_FAILURE);
-}
-
-int listen_at_port (int portnum) 
-{
-	int sock_fd = socket(AF_INET /*IPv4*/, SOCK_STREAM /*TCP*/, 0 /*IP*/) ;
-	if (sock_fd == 0)  { 
-		perror("socket failed : "); 
-		exit(EXIT_FAILURE); 
-	}
-	int opt = 2 ;
-	if (setsockopt(sock_fd, SOL_TCP, TCP_NODELAY, &opt, sizeof(opt)) != 0) {
-		fprintf(stderr, "fail at setsockopt\n") ;
-		exit(EXIT_FAILURE) ;
-	}
-
-	struct sockaddr_in address ; 
-	bzero(&address, sizeof(address)) ; 	
-	address.sin_family = AF_INET; 
-	address.sin_addr.s_addr = INADDR_ANY /* localhost */ ; 
-	address.sin_port = htons(portnum); 
-
-	if (bind(sock_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
-		perror("bind failed: "); 
-		exit(EXIT_FAILURE); 
-	} 
-
-	if (listen(sock_fd, 16 /* the size of waiting queue*/) < 0) { 
-		perror("listen failed : "); 
-		exit(EXIT_FAILURE); 
-	} 
-
-	int addrlen = sizeof(address); 
-	int conn_fd = accept(sock_fd, (struct sockaddr *) &address, (socklen_t*)&addrlen) ;
-	if (conn_fd < 0) {
-		perror("accept failed: "); 
-		exit(EXIT_FAILURE); 
-	}
-	return conn_fd ;
-}
-
-void chat_server (int conn_fd) 
-{
-	char (*server_board)[8] = initBoard();
-	screen_start(server_board);
-	int point[2] = {5, 5};
-	int check= 0; 	// check whether valid move
-
-	mvprintw(0, 0, "Partner turn                                                                          ");
-	refresh();
-
-	if (recv(conn_fd, point, 8, 0) == 0)
-		check = -10;
-
-	server_board[point[1]][point[0]] = 'X';
-	printBoard(server_board);
-	point[0] = point[0] * 2 + 5;
-	point[1] = point[1] * 2 + 5;
-
-	while(1)
-	{
-		if (check == 0)
-			mvprintw(0, 0, "You are 'O'. Now X's turn, X's move (yx): ");
-		else if(check == -1)
-			mvprintw(0, 0, "Invalid move, try again.");
-		else if (check == -2)
-				mvprintw(0, 0, "This place is already marked!                                          ");
-
-		refresh();
-
-		pickBoard(point);
-		keypad(stdscr, FALSE);
-		check = checkWhetherValid(server_board, point, 'O');
-		if (check < 0)
-			continue;
-		printBoard(server_board);
-		refresh();
-		send(conn_fd, point, 8, 0);
-
-		mvprintw(0, 0, "Partner turn                                                                          ");
-		refresh();
-	
-
-		if (recv(conn_fd, point, 8, 0) == 0)
-			break;
-		
-		server_board[point[1]][point[0]] = 'X';
-		printBoard(server_board);
-		point[0] = point[0] * 2 + 5;
-		point[1] = point[1] * 2 + 5;
-		check = 0;
-	}
-	endwin();
-
-}
-
-int connect_ipaddr_port (const char * ip, int port)
-{
-	int sock_fd ;
-	sock_fd = socket(AF_INET, SOCK_STREAM, 0) ;
-	if (sock_fd <= 0) {
-		perror("socket failed : ") ;
-		exit(EXIT_FAILURE) ;
-	}
-	int opt = 2 ;
-	if (setsockopt(sock_fd, SOL_TCP, TCP_NODELAY, &opt, sizeof(opt)) != 0) {
-		fprintf(stderr, "fail at setsockopt\n") ;
-		exit(EXIT_FAILURE) ;
-	}
-
-	struct sockaddr_in address ;
-	bzero(&address, sizeof(address)) ;
-	address.sin_family = AF_INET ; 
-	address.sin_port = htons(port) ; 
-	if (inet_pton(AF_INET, ip, &address.sin_addr) <= 0) {
-		perror("inet_pton failed : ") ; 
-		exit(EXIT_FAILURE) ;
-	} 
-
-	if (connect(sock_fd, (struct sockaddr *) &address, sizeof(address)) < 0) {
-		perror("connect failed : ") ;
-		exit(EXIT_FAILURE) ;
-	}
-	return sock_fd ;
-}
-
-void chat_client (int conn_fd)
-{
-	char (*clinet_board)[8] = initBoard();
-	screen_start(clinet_board);
-	int point[2] = {5, 5};
-	int check= 0; 	// check whether valid move
-	while(1)
-	{
-		if (check == 0)
-			mvprintw(0, 0, "You are 'X'. Now X's turn, X's move (yx): ");
-		else if(check == -1)
-			mvprintw(0, 0, "Invalid move, try again.");
-		else if (check == -2)
-				mvprintw(0, 0, "This place is already marked!                                          ");
-		mvprintw(10, 0, "%d - %d", point[0], point[1]);
-		refresh();
-
-		pickBoard(point);
-		keypad(stdscr, FALSE);
-		check = checkWhetherValid(clinet_board, point, 'X');
-		if (check < 0)
-			continue;
-		printBoard(clinet_board);
-		refresh();
-		mvprintw(0, 0, "Partner turn                                                                          ");
-		refresh();
-	
-		send(conn_fd, point, 8, 0);
-
-		if (recv(conn_fd, point, 8, 0) == 0)
-			break;
-		
-		clinet_board[point[1]][point[0]] = 'O';
-		printBoard(clinet_board);
-		point[0] = point[0] * 2 + 5;
-		point[1] = point[1] * 2 + 5;
-		check = 0;
-	}
-
-	endwin();
 }
