@@ -19,6 +19,18 @@ void screen_start(char (*the_board)[8]);
 
 void screen_end(int server, int client);
 
+void pickBoard(int *point);
+
+int checkWhetherValid(char (*the_board)[8], int *point, char xo);
+
+void changeBoard(char (*the_board)[8], int *point, char xo);
+
+int pass(char (*the_board)[8], char xo);
+
+int endgame(char (*the_board)[8]);
+
+int countBoard(char (*the_board)[8], char xo);
+
 void help();
 
 void error(char * message);
@@ -31,6 +43,6 @@ int connect_ipaddr_port (const char * ip, int port);
 
 void chat_client (int conn_fd);
 
-int checkWhetherValid(char (*the_board)[8], int *point, char xo);
+void networking(int conn_fd, char (*the_board)[8], char xo, int *point);
 
 #endif
